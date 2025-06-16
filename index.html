@@ -167,35 +167,39 @@
             badgeClass = 'bg-secondary';
         }
 
-        elemenDaftarAbsensi.append(
-          `<tr>
-            <td>${nomor}</td>
-            <td>${data.tanggal}</td>
-            <td>${data.nis}</td>
-            <td>${data.nama}</td>
-            <td>${data.kelas}</td>
-            <td>${data.alamat}</td>
-            <td>${data.notlpn}</td>
-            <td><span class="badge ${badgeClass}">${data.keterangan}</span></td>
-            <td>
-              <button class="btn btn-sm btn-primary me-1" title="Ubah"><i class="bi bi-pencil"></i></button>
-            <button class="btn btn-sm btn-danger me-1" title="Hapus"><i class="bi bi-trash"></i>
-              </button>
-            </td>
-          </tr>`
-        );
+  elemenDaftarAbsensi.append(
+    `<tr>
+    <td>${nomor}</td>
+    <td>${data.tanggal}</td>
+    <td>${data.nis}</td>
+    <td>${data.nama}</td>
+    <td>${data.kelas}</td>
+    <td>${data.alamat}</td>
+    <td>${data.notlpn}</td>
+    <td><span class="badge ${badgeClass}">${data.keterangan}</span></td>
+    <td>
+           
+  <a href='formubah.html?id=${data.id}' class='btn btn-sm btn-primary action-btn' title="Edit">
+   <i class="hi bi-pencil"></i>
+  </a>
+  <button class='btn btn-sm btn-danger action-btn tombol-hapus' data='${data.id}' title="Hapus">
+  <i class="bi bi-trash"></i>
+  </button>
+  </td>
+  </tr>`
+ );
 
-        nomor++;
-      });
+  nomor++;
+});
 
-      $('#jumlahabsensi').html(`Total Data Absensi: ${nomor - 1} siswa`);
+$('#jumlahabsensi').html(`Total Data Absensi: ${nomor - 1} siswa`);
 
-      $(".tombol-hapus").click(async function() {
-        if (confirm("Apakah Anda yakin ingin menghapus data absensi ini?")) {
-          await hapusAbsensi($(this).attr('data'));
-          location.reload();
-        }
-      });
+$(".tombol-hapus").click(async function() {
+  if (confirm("Apakah Anda yakin ingin menghapus data absensi ini?")) {
+  await hapusAbsensi($(this).attr('data'));
+    location.reload();
+    }
+    });
     });
   </script>
 </body>
