@@ -101,4 +101,38 @@ export async function tambahAbsensi(data) {
 }
 
 // Function to update attendance record
-export async function ubahAbsensi(data)
+export async function ubahAbsensi(data) {
+  try {
+    const docRef = doc(db, "absensi", data.id);
+    await updateDoc(docRef, {
+      tanggal: data.tanggal,
+      nis: data.nis,
+      nama: data.nama,
+      alamat: data.alamat,
+      notlpn: data.notlpn,
+      kelas: data.kelas,
+      keterangan: data.keterangan,
+      updatedAt: new Date().toISOString()
+    });
+    
+    console.log("Attendance record updated successfully");
+    return true;
+  } catch (error) {
+    console.error("Error updating attendance record: ", error);
+    throw error;
+  }
+}
+
+// Function to delete attendance record
+export async function hapusAbsensi(id) {
+  try {
+    await deleteDoc(doc(db, "absensi", id));
+    console.log("Attendance record deleted successfully");
+    return true;
+  } catch (error) {
+    console.error("Error deleting attendance record: ", error);
+    throw error;
+  }
+}
+
+// Additional functions for reporting/statistics
