@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+  
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  
+  <title>to do list</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .header {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+      border-radius: 0 0 10px 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .footer {
+      background-color: #343a40;
+      color: white;
+      padding: 1.5rem 0;
+      margin-top: 2rem;
+      border-radius: 10px 10px 0 0;
+    }
+    .table-container {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .btn-add {
+      background-color: #28a745;
+      color: white;
+      font-weight: bold;
+      padding: 10px 20px;
+      border-radius: 50px;
+      transition: all 0.3s;
+    }
+    .btn-add:hover {
+      background-color: #218838;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .badge-hadir {
+      background-color: #28a745;
+    }
+    .badge-tidak-hadir {
+      background-color: #dc3545;
+    }
+    .badge-sakit {
+      background-color: #ffc107;
+      color: #212529;
+    }
+    .badge-izin {
+      background-color: #17a2b8;
+    }
+    .action-btn {
+      margin: 0 3px;
+      width: 35px;
+      height: 35px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header text-center">
+    <div class="container">
+      <h1><i class="fas fa-user-graduate me-2"></i> DATA ABSENSI SISWA</h1>
+      <p class="lead">Sistem Manajemen Absensi Digital</p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <h3><i class="fas fa-list me-2"></i> Daftar Absensi</h3>
+      </div>
+      <div class="col-md-6 text-end">
+        <a href="formtambah.html" class="btn btn-add">
+          <i class="fas fa-plus me-2"></i>Tambah Data
+        </a>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="table table-hover table-striped" id="daftar-absensi">
+        <thead class="table-primary">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Tanggal</th>
+            <th scope="col">NIS</th>
+            <th scope="col">Nama</th>
+            <th scope="col">alamat</th>
+            <th scope="col">notlpn</th>
+            <th scope="col">Kelas</th>
+            <th scope="col">Keterangan</th>
+            <th scope="col">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Data akan diisi oleh JavaScript -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i>
+      <span id="jumlahabsensi">Memuat data absensi...</span>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer text-center">
+    <div class="container">
+      <p>&copy; 2023 Sistem Absensi Sekolah | Dibuat dengan <i class="fas fa-heart text-danger"></i> oleh Tim Pengembang</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+  <script type="module">
+    import { hapusAbsensi, ambilDaftarAbsensi } from './main.js';
+
+    $(document).ready(async function() {
+      let elemenDaftarAbsensi = $("#daftar-absensi > tbody");
+      let daftarAbsensi = await ambilDaftarAbsensi();
+
+      let nomor = 1;
+
+      daftarAbsensi.forEach((data) => {
+        let badgeClass = '';
+        switch(data.keterangan.toLowerCase()) {
+          case 'hadir':
+            badgeClass = 'badge-hadir';
+            break;
+          case 'tidak hadir':
+            badgeClass = 'badge-tidak-hadir';
+            break;
+          case 'sakit':
+            badgeClass = 'badge-sakit';
+            break;
+          case 'izin':
+            badgeClass = 'badge-izin';
+            break;
+          default:
+            badgeClass = 'bg-secondary';
+        }
+
+        elemenDaftarAbsensi.append(
+          `<tr>
+            <td>${nomor}</td>
+            <td>${data.tanggal}</td>
+            <td>${data.nis}</td>
+            <td>${data.nama}</td>
+            <td>${data.kelas}</td>
+            <td><span class="badge ${badgeClass}">${data.keterangan}</span></td>
+            <td>
+              <a href='formubah.html?id=${data.id}' class='btn btn-sm btn-primary action-btn' title="Edit">
+                <i class="fas fa-edit"></i>
+              </a>
+              <button class='btn btn-sm btn-danger action-btn tombol-hapus' data='${data.id}' title="Hapus">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+          </tr>`
+        );
+
+        nomor++;
+      });
+
+      $('#jumlahabsensi').html(`Total Data Absensi: ${nomor - 1} siswa`);
+
+      $(".tombol-hapus").click(async function() {
+        if (confirm("Apakah Anda yakin ingin menghapus data absensi ini?")) {
+          await hapusAbsensi($(this).attr('data'));
+          location.reload();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
