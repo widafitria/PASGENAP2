@@ -1,4 +1,4 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js'
 import {
   getFirestore,
   collection,
@@ -11,13 +11,13 @@ import {
   query,
   orderBy,
   where
-} from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js';
+} from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js'
 
 const firebaseConfig = {
   apiKey: "AIzaSyDmI0zRauvzaL4oEuXinkmXhGiwTsYxYQc",
   authDomain: "insan-cemerlang-ee7af.firebaseapp.com",
   projectId: "insan-cemerlang-ee7af",
-  storageBucket: "insan-cemerlang-ee7af.appspot.com",
+  storageBucket: "insan-cemerlang-ee7af.firebasestorage.app",
   messagingSenderId: "1047091827759",
   appId: "1:1047091827759:web:0f1742d6f3922f856de2da",
   measurementId: "G-GL8J5GC8XB"
@@ -28,39 +28,40 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Collection reference
-const absensiCollection = collection(db, "absensi");
+const absensiCollection = collection(db, "absensi_siswa");
 
-// Function to get all attendance records
+/**
+ * Get all attendance records sorted by date (newest first)
+ * @returns {Promise<Array>} Array of attendance records
+ */
 export async function ambilDaftarAbsensi() {
   try {
-    const q = query(absensiCollection, orderBy("tanggal", "desc"), orderBy("nama"));
+    const q = query(absensiCollection, orderBy("tanggal", "desc"));
     const querySnapshot = await getDocs(q);
     
-    const attendanceList = [];
+    const absensiList = [];
     querySnapshot.forEach((doc) => {
-      attendanceList.push({
+      absensiList.push({
         id: doc.id,
-        tanggal: doc.data().tanggal,
-        nis: doc.data().nis,
-        nama: doc.data().nama,
-        alamat: doc.data().alamat,
-        notlpn: doc.data().notlpn,
-        kelas: doc.data().kelas,
-        keterangan: doc.data().keterangan
+        ...doc.data()
       });
     });
     
-    return attendanceList;
+    return absensiList;
   } catch (error) {
     console.error("Error getting attendance data: ", error);
-    return [];
+    throw error;
   }
 }
 
-// Function to get single attendance record by ID
+/**
+ * Get attendance record by ID
+ * @param {string} id - Document ID
+ * @returns {Promise<Object>} Attendance record
+ */
 export async function ambilAbsensiById(id) {
   try {
-    const docRef = doc(db, "absensi", id);
+    const docRef = doc(db, "absensi_siswa", id);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
@@ -69,25 +70,34 @@ export async function ambilAbsensiById(id) {
         ...docSnap.data()
       };
     } else {
-      console.log("No such document!");
-      return null;
+      throw new Error("Document not found");
     }
   } catch (error) {
-    console.error("Error getting attendance record: ", error);
-    return null;
+    console.error("Error getting attendance by ID: ", error);
+    throw error;
   }
 }
 
-// Function to add new attendance record
+/**
+ * Add new attendance record
+ * @param {Object} data - Attendance data
+ * @returns {Promise<string>} Document ID of the new record
+ */
 export async function tambahAbsensi(data) {
   try {
+    // Validate required fields
+    if (!data.tanggal || !data.nis || !data.nama || !data.kelas || !data.keterangan) {
+      throw new Error("Required fields are missing");
+    }
+    
+    // Add document to Firestore
     const docRef = await addDoc(absensiCollection, {
       tanggal: data.tanggal,
       nis: data.nis,
       nama: data.nama,
-      alamat: data.alamat,
-      notlpn: data.notlpn,
       kelas: data.kelas,
+      alamat: data.alamat || "",
+      notlpn: data.notlpn || "",
       keterangan: data.keterangan,
       createdAt: new Date().toISOString()
     });
@@ -95,44 +105,148 @@ export async function tambahAbsensi(data) {
     console.log("Attendance record added with ID: ", docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error("Error adding attendance record: ", error);
+    console.error("Error adding attendance: ", error);
     throw error;
   }
 }
 
-// Function to update attendance record
+/**
+ * Update attendance record
+ * @param {Object} data - Attendance data with ID
+ * @returns {Promise<void>}
+ */
 export async function ubahAbsensi(data) {
   try {
-    const docRef = doc(db, "absensi", data.id);
+    if (!data.id) {
+      throw new Error("Document ID is required for update");
+    }
+    
+    const docRef = doc(db, "absensi_siswa", data.id);
     await updateDoc(docRef, {
       tanggal: data.tanggal,
       nis: data.nis,
       nama: data.nama,
-      alamat: data.alamat,
-      notlpn: data.notlpn,
       kelas: data.kelas,
+      alamat: data.alamat || "",
+      notlpn: data.notlpn || "",
       keterangan: data.keterangan,
       updatedAt: new Date().toISOString()
     });
     
     console.log("Attendance record updated successfully");
-    return true;
   } catch (error) {
-    console.error("Error updating attendance record: ", error);
+    console.error("Error updating attendance: ", error);
     throw error;
   }
 }
 
-// Function to delete attendance record
+/**
+ * Delete attendance record
+ * @param {string} id - Document ID to delete
+ * @returns {Promise<void>}
+ */
 export async function hapusAbsensi(id) {
   try {
-    await deleteDoc(doc(db, "absensi", id));
+    await deleteDoc(doc(db, "absensi_siswa", id));
     console.log("Attendance record deleted successfully");
-    return true;
   } catch (error) {
-    console.error("Error deleting attendance record: ", error);
+    console.error("Error deleting attendance: ", error);
     throw error;
   }
 }
 
-// Additional functions for reporting/statistics
+/**
+ * Get attendance statistics (count by status)
+ * @returns {Promise<Object>} Object with counts for each status
+ */
+export async function ambilStatistikAbsensi() {
+  try {
+    const q = query(absensiCollection);
+    const querySnapshot = await getDocs(q);
+    
+    const statistik = {
+      hadir: 0,
+      sakit: 0,
+      izin: 0,
+      tidak_hadir: 0,
+      total: 0
+    };
+    
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const status = data.keterangan.toLowerCase().replace(' ', '_');
+      
+      if (statistik.hasOwnProperty(status)) {
+        statistik[status]++;
+      }
+      statistik.total++;
+    });
+    
+    return statistik;
+  } catch (error) {
+    console.error("Error getting attendance statistics: ", error);
+    throw error;
+  }
+}
+
+/**
+ * Get attendance records by date range
+ * @param {string} startDate - Start date (YYYY-MM-DD)
+ * @param {string} endDate - End date (YYYY-MM-DD)
+ * @returns {Promise<Array>} Array of attendance records
+ */
+export async function ambilAbsensiByDateRange(startDate, endDate) {
+  try {
+    const q = query(
+      absensiCollection,
+      where("tanggal", ">=", startDate),
+      where("tanggal", "<=", endDate),
+      orderBy("tanggal", "desc")
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const absensiList = [];
+    
+    querySnapshot.forEach((doc) => {
+      absensiList.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return absensiList;
+  } catch (error) {
+    console.error("Error getting attendance by date range: ", error);
+    throw error;
+  }
+}
+
+/**
+ * Get attendance records by student NIS
+ * @param {string} nis - Student NIS
+ * @returns {Promise<Array>} Array of attendance records
+ */
+export async function ambilAbsensiByNis(nis) {
+  try {
+    const q = query(
+      absensiCollection,
+      where("nis", "==", nis),
+      orderBy("tanggal", "desc")
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const absensiList = [];
+    
+    querySnapshot.forEach((doc) => {
+      absensiList.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    return absensiList;
+  } catch (error) {
+    console.error("Error getting attendance by NIS: ", error);
+    throw error;
+  }
+}
