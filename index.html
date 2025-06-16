@@ -96,7 +96,7 @@
       </div>
       <div class="col-md-6 text-end">
         <a href="formtambah.html" class="btn btn-add">
-          <i class="fas fa-plus me-2"></i>Tambah Data
+          <i class="fas fa-plus me-2"></i>Tambah Data Absensi 
         </a>
       </div>
     </div>
@@ -105,7 +105,7 @@
       <table class="table table-hover table-striped" id="daftar-absensi">
         <thead class="table-primary">
           <tr>
-            <th scope="col">#</th>
+            <th scope="col">no</th>
             <th scope="col">tanggal</th>
             <th scope="col">NIS</th>
             <th scope="col">nama</th>
@@ -174,13 +174,12 @@
             <td>${data.nis}</td>
             <td>${data.nama}</td>
             <td>${data.kelas}</td>
+            <td>${data.alamat}</td>
+            <td>${data.notlpn}</td>
             <td><span class="badge ${badgeClass}">${data.keterangan}</span></td>
             <td>
-              <a href='formubah.html?id=${data.id}' class='btn btn-sm btn-primary action-btn' title="Edit">
-                <i class="fas fa-edit"></i>
-              </a>
-              <button class='btn btn-sm btn-danger action-btn tombol-hapus' data='${data.id}' title="Hapus">
-                <i class="fas fa-trash-alt"></i>
+              <button class="btn btn-sm btn-primary me-1" title="Ubah"><i class="bi bi-pencil"></i></button>
+            <button class="btn btn-sm btn-danger me-1" title="Hapus"><i class="bi bi-trash"></i>
               </button>
             </td>
           </tr>`
